@@ -26,6 +26,18 @@ claude mcp add --transport http meshvault https://thefiredev.com/mcp --header "A
 
 Claude and ChatGPT custom connectors use OAuth: add the URL, and the sign-in page asks for a key or creates a free one. `/mcp/try` needs no credentials and allows 10 calls a day per network. Gemini CLI: `gemini extensions install https://github.com/thefiredev-cloud/meshvault-connectors` (set `MESHVAULT_API_KEY`).
 
+Cursor, VS Code and other clients that read an `mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "meshvault": { "url": "https://thefiredev.com/mcp" }
+  }
+}
+```
+
+The client opens the OAuth sign-in on first use. Registry name: `io.github.thefiredev-cloud/meshvault-connectors` in the [official MCP registry](https://registry.modelcontextprotocol.io/v0/servers?search=meshvault-connectors); also listed on [Glama](https://glama.ai/mcp/connectors/io.github.thefiredev-cloud/meshvault-connectors).
+
 ## Plans
 
 | Plan | Calls per UTC day | Price |
