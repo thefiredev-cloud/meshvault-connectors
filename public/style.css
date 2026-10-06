@@ -45,7 +45,7 @@ pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospac
 pre { background: var(--code); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; overflow-x: auto; margin: 0; line-height: 1.55; }
 :not(pre) > code { background: var(--code); padding: 1px 6px; border-radius: 5px; }
 section { padding: 44px 0; border-top: 1px solid var(--line); }
-.sub { color: var(--mut); max-width: 40em; margin: 0 0 24px; }
+.sub { color: var(--mut); max-width: 34em; margin: 0 0 24px; }
 .groups { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 @media (max-width: 760px) { .groups { grid-template-columns: 1fr; } }
 .group { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
@@ -83,7 +83,7 @@ footer a { margin-right: 18px; display: inline-block; padding: 8px 0; }
 .faq details { border-top: 1px dashed var(--line); padding: 4px 0; }
 .faq details:first-child { border-top: 0; }
 .faq summary { cursor: pointer; font-weight: 650; padding: 12px 0; }
-.faq details p { margin: 0 0 14px; color: var(--mut); max-width: 40em; }
+.faq details p { margin: 0 0 14px; color: var(--mut); max-width: 34em; }
 .prose td { max-width: 30em; }
 .prose table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.93rem; }
 .prose th, .prose td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
