@@ -297,7 +297,7 @@ export function registerOAuthRoutes(app: Hono, deps: Deps): void {
         await deps.store.put(`oauth/codes/${jti}.json`, { fam, at: Date.now() }, { createOnly: true });
       } catch (e) {
         if (e instanceof ConflictError) {
-          await deps.store.put(`oauth/families/${fam}.json`, { revoked: true, at: Date.now() }).catch(() => undefined);
+          await deps.store.put(`oauth/families/${fam}.json`, { revoked: true, at: Date.now() });
           return oauthError("invalid_grant", "Authorization code already used.");
         }
         throw e;
@@ -318,16 +318,18 @@ export function registerOAuthRoutes(app: Hono, deps: Deps): void {
       const famRevoked = await deps.store.get(`oauth/families/${v.fam}.json`);
       if (famRevoked || v.exp < Date.now()) return oauthError("invalid_grant", "Refresh token expired or revoked.");
       if (v.used) {
-        await deps.store.put(`oauth/families/${v.fam}.json`, { revoked: true, at: Date.now() }).catch(() => undefined);
+        await deps.store.put(`oauth/families/${v.fam}.json`, { revoked: true, at: Date.now() });
         return oauthError("invalid_grant", "Refresh token reuse detected; the session was revoked.");
       }
-      let won = false;
-      await update<typeof v>(deps.store, path, (x) => {
+      const claimed = await update<typeof v>(deps.store, path, (x) => {
         if (!x || x.used) return undefined;
-        won = true;
         return { ...x, used: true };
       });
-      if (!won) return oauthError("invalid_grant", "Refresh token already used.");
+      if (!claimed) {
+        // Another request won the CAS. Treat this as replay, not a second winner.
+        await deps.store.put(`oauth/families/${v.fam}.json`, { revoked: true, at: Date.now() });
+        return oauthError("invalid_grant", "Refresh token reuse detected; the session was revoked.");
+      }
       const rec = await getKeyById(deps.store, v.kid);
       if (!rec || rec.status !== "active") return oauthError("invalid_grant", "The key behind this session is no longer active.");
       return mint(v.kid, v.cid, v.fam, v.scope);
@@ -346,7 +348,9 @@ export function clientIp(c: Context): string {
 export async function verifyAccessToken(deps: Deps, token: string, base: string): Promise<string | null> {
   try {
     const { payload } = await jwtVerify(token, signingKey(deps), { algorithms: ["HS256"], issuer: base, audience: `${base}/mcp` });
-    return typeof payload.sub === "string" ? payload.sub : null;
+    if (typeof payload.sub !== "string" || typeof payload.fam !== "string") return null;
+    if (await deps.store.get(`oauth/families/${payload.fam}.json`)) return null;
+    return payload.sub;
   } catch {
     return null;
   }
