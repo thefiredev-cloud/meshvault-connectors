@@ -13,18 +13,18 @@ Every tool is annotated read-only. EMS results are education and reference, not 
 
 ## Use it
 
-Server URL: `https://<host>/mcp`
+Server URL: `https://thefiredev.com/mcp` (landing page, docs and pricing: https://thefiredev.com/connectors)
 
 ```bash
 # Claude Code
-claude mcp add --transport http meshvault https://<host>/mcp --header "Authorization: Bearer $MESHVAULT_API_KEY"
+claude mcp add --transport http meshvault https://thefiredev.com/mcp --header "Authorization: Bearer $MESHVAULT_API_KEY"
 # Codex CLI (~/.codex/config.toml)
 # [mcp_servers.meshvault]
-# url = "https://<host>/mcp"
+# url = "https://thefiredev.com/mcp"
 # bearer_token_env_var = "MESHVAULT_API_KEY"
 ```
 
-Claude and ChatGPT custom connectors use OAuth: add the URL, and the sign-in page asks for a key or creates a free one. `/mcp/try` needs no credentials and allows 10 calls a day per network.
+Claude and ChatGPT custom connectors use OAuth: add the URL, and the sign-in page asks for a key or creates a free one. `/mcp/try` needs no credentials and allows 10 calls a day per network. Gemini CLI: `gemini extensions install https://github.com/thefiredev-cloud/meshvault-connectors` (set `MESHVAULT_API_KEY`).
 
 ## Plans
 
@@ -74,10 +74,13 @@ Environment variables are listed in `.env.example`. Use Stripe test-mode keys un
 
 ## Deploy
 
-1. Import this repo as a Vercel project (framework: Other; the settings are in `vercel.json`).
-2. Add a private Blob store and set the variables from `.env.example`.
-3. Add the webhook endpoint `https://<host>/api/stripe/webhook` for the four events above.
-4. Publish `server.json` with `mcp-publisher` (fill in the production host first).
+Two supported shapes:
+
+**Own Vercel project.** Import this repo (framework: Other; settings are in `vercel.json`), add a private Blob store, set the variables from `.env.example`, add the webhook endpoint `https://<host>/api/stripe/webhook` for the four events above.
+
+**Mounted in another site** (how thefiredev.com runs it). `node scripts/export-mount.mjs --out <host repo> --prefix /connectors` writes one bundled Vercel Function (`api/connectors.js`), the static pages under `public/connectors/`, and `connectors.rewrites.json` for the host's `vercel.json`. The host sets `CONNECTORS_*` variables (`CONNECTORS_APP_SECRET`, `CONNECTORS_PUBLIC_BASE_URL`, `CONNECTORS_LANDING_PATH`, `CONNECTORS_STRIPE_SECRET_KEY`, `CONNECTORS_STRIPE_PRICE_PRO`, `CONNECTORS_STRIPE_WEBHOOK_SECRET`) and a Blob store connected with variable prefix `CONNECTORS_BLOB`. The service owns `/mcp`, `/oauth/*`, `/.well-known/oauth-*`, `/billing/*`, `/api/keys`, `/api/usage`, `/api/checkout`, `/api/billing`, `/api/stripe`, `/health`.
+
+Then publish `server.json` with `mcp-publisher`.
 
 ## License
 

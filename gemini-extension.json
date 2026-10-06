@@ -1,0 +1,14 @@
+{
+  "name": "meshvault-connectors",
+  "version": "0.1.0",
+  "description": "Read-only tools for EMS protocols, judges and courts, public health data (NPI, FDA) and open-model GPU sizing. Free key, Pro $19 a month.",
+  "mcpServers": {
+    "meshvault": {
+      "httpUrl": "https://thefiredev.com/mcp",
+      "headers": {
+        "Authorization": "Bearer $MESHVAULT_API_KEY"
+      },
+      "timeout": 30000
+    }
+  }
+}

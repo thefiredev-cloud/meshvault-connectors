@@ -95,6 +95,19 @@ describe("MCP over streamable HTTP", () => {
     await client.close();
   });
 
+  it("points upgrade and docs links at the landing path when mounted under another site", async () => {
+    const { fetchApp } = makeApp({ fetchImpl: upstreamFake, env: { LANDING_PATH: "/connectors" } });
+    const client = await connect(fetchApp, {}, "/mcp/try");
+    let last: unknown;
+    for (let i = 0; i < 11; i++) last = await client.callTool({ name: "models_gpu_catalog", arguments: { query: "4090" } });
+    expect(text(last)).toContain(`${BASE}/connectors#pricing`);
+    await client.close();
+    const meta = (await (await fetchApp(`${BASE}/.well-known/oauth-authorization-server`)).json()) as { service_documentation: string };
+    expect(meta.service_documentation).toBe(`${BASE}/connectors/docs`);
+    const nf = (await (await fetchApp(`${BASE}/nope`)).json()) as { docs: string };
+    expect(nf.docs).toBe(`${BASE}/connectors/docs`);
+  });
+
   it("gives a revoked key no access", async () => {
     const { fetchApp, store } = makeApp();
     const key = await freeKey(fetchApp);

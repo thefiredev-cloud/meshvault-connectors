@@ -1,6 +1,6 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
-import { PLANS, SERVER_INFO } from "./config.js";
+import { PLANS, SERVER_INFO, docsUrl } from "./config.js";
 import type { Deps } from "./deps.js";
 import { createCheckoutSession, createPortalSession, handleWebhook, revealPurchasedKey } from "./billing.js";
 import { getKeyById, issueKey, verifyRawKey, looksLikeKey } from "./keys.js";
@@ -197,7 +197,7 @@ export function createApp(deps: Deps): Hono {
     }
   });
 
-  app.notFound((c) => c.json({ error: "not_found", path: new URL(c.req.url).pathname, docs: `${originOf(c, deps)}/docs` }, 404));
+  app.notFound((c) => c.json({ error: "not_found", path: new URL(c.req.url).pathname, docs: docsUrl(deps.env, originOf(c, deps)) }, 404));
   app.onError((err, c) => {
     console.error(JSON.stringify({ level: "error", message: err.message }));
     return c.json({ error: "internal_error" }, 500);
