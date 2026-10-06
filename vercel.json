@@ -1,0 +1,35 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm typecheck",
+  "outputDirectory": "public",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "functions": {
+    "api/index.ts": { "maxDuration": 30 }
+  },
+  "rewrites": [
+    { "source": "/mcp", "destination": "/api/index?__path=/mcp" },
+    { "source": "/mcp/try", "destination": "/api/index?__path=/mcp/try" },
+    { "source": "/health", "destination": "/api/index?__path=/health" },
+    { "source": "/oauth/:rest*", "destination": "/api/index?__path=/oauth/:rest*" },
+    { "source": "/.well-known/:rest*", "destination": "/api/index?__path=/.well-known/:rest*" },
+    { "source": "/billing/:rest*", "destination": "/api/index?__path=/billing/:rest*" },
+    { "source": "/api/keys/:rest*", "destination": "/api/index?__path=/api/keys/:rest*" },
+    { "source": "/api/usage", "destination": "/api/index?__path=/api/usage" },
+    { "source": "/api/checkout", "destination": "/api/index?__path=/api/checkout" },
+    { "source": "/api/billing/:rest*", "destination": "/api/index?__path=/api/billing/:rest*" },
+    { "source": "/api/stripe/:rest*", "destination": "/api/index?__path=/api/stripe/:rest*" }
+  ],
+  "headers": [
+    {
+      "source": "/((?!oauth|billing|mcp|api|health|\\.well-known).*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'" }
+      ]
+    }
+  ]
+}

@@ -18,6 +18,8 @@ const root = new Hono();
 root.get("/", serveStatic({ path: "./public/index.html" }));
 root.get("/docs", serveStatic({ path: "./public/docs/index.html" }));
 root.use("/*", serveStatic({ root: "./public" }));
+root.get("/privacy", serveStatic({ path: "./public/privacy.html" }));
+root.get("/terms", serveStatic({ path: "./public/terms.html" }));
 root.route("/", api);
 
 serve({ fetch: root.fetch, port }, (info) => console.log(`meshvault-connectors dev server on http://127.0.0.1:${info.port}`));

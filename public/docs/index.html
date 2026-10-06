@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Docs · MeshVault Connectors</title>
+<meta name="description" content="Connection steps, authentication, quotas and the full tool reference for MeshVault Connectors.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="/">MeshVault Connectors</a><nav aria-label="Primary"><a href="/#pricing">Pricing</a><a href="/docs">Docs</a></nav></header>
+  <main class="prose">
+    <h1>Docs</h1>
+    <p>MeshVault Connectors is one remote MCP server (Streamable HTTP, stateless JSON responses) exposing 18 read-only tools in four groups. Protocol version 2025-06-18 and later clients work.</p>
+
+    <h2>Endpoints</h2>
+    <table>
+      <tr><td>/mcp</td><td>Main endpoint. Requires OAuth or an API key.</td></tr>
+      <tr><td>/mcp/try</td><td>No key. 10 calls a day per network. For quick trials and reviews.</td></tr>
+      <tr><td>/.well-known/oauth-protected-resource</td><td>OAuth discovery (RFC 9728). Authorization server metadata at <code>/.well-known/oauth-authorization-server</code>.</td></tr>
+      <tr><td>/api/usage</td><td>Your plan, daily limit and calls used today (Bearer key).</td></tr>
+    </table>
+
+    <h2>Authentication</h2>
+    <p><strong>OAuth 2.1</strong> with dynamic client registration, authorization code and PKCE (S256 only). The sign-in page asks for your API key or creates a free one. Access tokens last one hour; refresh tokens rotate and a replayed token revokes the session.</p>
+    <p><strong>API key</strong>: send <code>Authorization: Bearer mvc_…</code> (or <code>X-API-Key</code>). Keys are stored only as SHA-256 hashes. Revoked keys stop working within about 10 seconds.</p>
+
+    <h2>Quotas</h2>
+    <table>
+      <tr><td>Anonymous</td><td>10 tool calls a day per network, <code>/mcp/try</code> only.</td></tr>
+      <tr><td>Free key</td><td>100 tool calls a day.</td></tr>
+      <tr><td>Pro, $19 a month</td><td>5,000 tool calls a day.</td></tr>
+    </table>
+    <p>Only <code>tools/call</code> counts. Listing tools is free. When the limit is reached the tool returns an error naming the plan, usage and reset time (00:00 UTC). Calls rejected for bad input, and calls that fail because a data source was unavailable, are given back.</p>
+
+    <h2>Billing</h2>
+    <p>Subscribe on the <a href="/#pricing">pricing section</a>. Payment is on Stripe Checkout. Paste an existing free key to upgrade that key, or leave it blank and a Pro key is issued on the confirmation page (shown for 24 hours). Cancelling ends Pro: upgraded free keys drop back to Free, keys issued by the purchase are revoked at the end of the paid period.</p>
+
+    <h2>Tool reference</h2>
+    <table>
+      <tr><td>ems_search_protocols</td><td>query, state or agency_id, limit. Cited excerpts from published EMS protocol books.</td></tr>
+      <tr><td>ems_get_protocol</td><td>id. Full text of one protocol section.</td></tr>
+      <tr><td>ems_list_agencies</td><td>state. Agency ids and section counts.</td></tr>
+      <tr><td>ems_coverage</td><td>state (optional). Local, state or national-model source per county.</td></tr>
+      <tr><td>legal_search_judges</td><td>query, state, limit.</td></tr>
+      <tr><td>legal_get_judge</td><td>slug. Court, caseload, practice-area activity.</td></tr>
+      <tr><td>legal_judge_recent_cases</td><td>judge_id, limit.</td></tr>
+      <tr><td>legal_search_courts</td><td>query, state, county, type, limit.</td></tr>
+      <tr><td>legal_court_judges</td><td>court_id, limit.</td></tr>
+      <tr><td>health_npi_lookup</td><td>npi, or first/last name, organization, state, city, specialty.</td></tr>
+      <tr><td>health_drug_label</td><td>name, sections. FDA labeling text.</td></tr>
+      <tr><td>health_drug_recalls</td><td>query, classification, status, limit.</td></tr>
+      <tr><td>health_drug_adverse_events</td><td>drug, top. FAERS report counts.</td></tr>
+      <tr><td>models_fit_check</td><td>model_id or params_b, hardware list, context_tokens, quants. Fit verdicts and speed ceiling.</td></tr>
+      <tr><td>models_estimate_vram</td><td>model_id or params_b, quant, context_tokens, kv_cache, batch.</td></tr>
+      <tr><td>models_gguf_files</td><td>repo_id, memory_gb. Exact GGUF sizes.</td></tr>
+      <tr><td>models_search_hf</td><td>query, task, gguf_only, sort.</td></tr>
+      <tr><td>models_gpu_catalog</td><td>query. Memory and bandwidth for common accelerators.</td></tr>
+    </table>
+
+    <h2>Safety and sources</h2>
+    <p>EMS results come from Protocol Guide and are for education and reference only; they are not medical direction. Legal results come from JudgeFinder and are informational, not legal advice. Health results come from CMS NPPES and FDA openFDA; they are unvalidated public data and not medical advice. Model sizing results are estimates. Every tool response repeats the relevant notice.</p>
+
+    <h2>Support</h2>
+    <p>Email <a href="mailto:tanner@meshvault.ai">tanner@meshvault.ai</a>. Source code and issues: <a href="https://github.com/thefiredev-cloud/meshvault-connectors">github.com/thefiredev-cloud/meshvault-connectors</a>.</p>
+  </main>
+</div>
+</body>
+</html>

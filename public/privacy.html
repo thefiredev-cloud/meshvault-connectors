@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy · MeshVault Connectors</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="/">MeshVault Connectors</a><nav aria-label="Primary"><a href="/docs">Docs</a></nav></header>
+  <main class="prose">
+    <h1>Privacy policy</h1>
+    <p>Effective 2026-10-05. Operator: The Fire Dev LLC (MeshVault). Contact: <a href="mailto:tanner@meshvault.ai">tanner@meshvault.ai</a>.</p>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li><strong>Email address</strong>, when you create a free key or subscribe. Used for your key, receipts and service notices.</li>
+      <li><strong>API key hash.</strong> We store a SHA-256 hash of your key, its plan and status. We cannot read your key back.</li>
+      <li><strong>Usage counters.</strong> Number of tool calls per key per day. For anonymous calls, a salted hash of your network address, not the address itself.</li>
+      <li><strong>Billing data</strong> is held by Stripe. We store your Stripe customer and subscription ids and never see your card number.</li>
+    </ul>
+
+    <h2>What we do not collect</h2>
+    <p>We do not store the questions you send or the results returned. Tool arguments pass through to the public data sources below and are not logged by us beyond standard platform request logs (path, status, timing). Do not put patient-identifying information or confidential case details into tool arguments.</p>
+
+    <h2>Who receives data</h2>
+    <p>Your tool arguments are sent to the source each tool uses: Protocol Guide (protocol-guide.com), JudgeFinder (judgefinder.vercel.app), CMS NPPES (npiregistry.cms.hhs.gov), FDA openFDA (api.fda.gov) and Hugging Face (huggingface.co). Hosting is on Vercel; payments on Stripe. We do not sell data or use it for advertising.</p>
+
+    <h2>Retention and your choices</h2>
+    <p>Key and billing records are kept while your key is active and for tax and fraud records after. Usage counters are kept for operations and abuse prevention. Email <a href="mailto:tanner@meshvault.ai">tanner@meshvault.ai</a> to delete your key record or ask what we hold.</p>
+
+    <h2>Security</h2>
+    <p>Keys are hashed at rest, OAuth tokens are short-lived and signed, traffic is encrypted in transit. No system is perfect; report issues to the address above.</p>
+
+    <h2>Changes</h2>
+    <p>We will post changes here and update the effective date.</p>
+  </main>
+</div>
+</body>
+</html>

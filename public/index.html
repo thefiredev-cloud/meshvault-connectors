@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MeshVault Connectors: EMS, legal, health and model-sizing tools for ChatGPT, Claude and Gemini</title>
+<meta name="description" content="Remote MCP connectors that give ChatGPT, Claude and Gemini read-only tools for EMS protocols, judges and courts, public health data, and GPU fit math for open-weight models. Free tier, Pro at $19 a month.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+<meta property="og:title" content="MeshVault Connectors">
+<meta property="og:description" content="Read-only MCP tools for EMS protocols, judges and courts, public health data and open-model sizing.">
+<meta property="og:type" content="website">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1-.4-1.8-1-2.6C16.6 9.600 19 12 19 15a7 7 0 0 1-14 0c0-6 6-8 7-13z" fill="currentColor"/></svg>MeshVault Connectors</a>
+    <nav aria-label="Primary"><a href="#tools">Tools</a><a href="#connect">Connect</a><a href="#pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  </header>
+
+  <main>
+  <div class="hero">
+    <div>
+      <h1>Real data for your AI assistant. Four tool sets, one connector.</h1>
+      <p class="lede">Add one URL to ChatGPT, Claude or Gemini and your assistant can look up EMS protocols, judges and courts, public health records, and whether a model fits your GPU. Read-only. Every answer names its source.</p>
+      <div class="cta">
+        <a class="btn primary" href="#pricing">Get a free key</a>
+        <a class="btn" href="#connect">How to connect</a>
+      </div>
+      <p class="fine" style="margin-top:18px">18 tools. Free tier needs no card. Not medical or legal advice.</p>
+    </div>
+    <pre aria-label="Example tool call" id="sample">ems_search_protocols
+  query: "adult cardiac arrest epinephrine"
+  state: "CA"
+
+→ Los Angeles County EMS Agency
+  1210 Cardiac Arrest · rev. 07-01-26
+  "Epinephrine may improve outcomes if given
+   early in non-shockable rhythms, but can
+   worsen outcomes early in shockable rhythms…"
+  source: file.lacounty.gov/…/1210CardiacArrest.pdf
+
+models_fit_check
+  model: Qwen/Qwen3-8B · 2× DGX Spark · 32k ctx
+
+→ Q8_0 fits · 14.3 GB of 225 GB usable</pre>
+  </div>
+
+  <section id="tools" aria-labelledby="t-h">
+    <h2 id="t-h">What it can do</h2>
+    <p class="sub">Each group calls a public source and returns cited, trimmed results your assistant can reason over. Nothing writes anywhere.</p>
+    <div class="groups">
+      <article class="group">
+        <span class="tag">ems</span>
+        <h3>EMS protocols</h3>
+        <ul>
+          <li><code>ems_search_protocols</code> semantic search by state or agency</li>
+          <li><code>ems_get_protocol</code> full text of one section</li>
+          <li><code>ems_list_agencies</code> agencies with books loaded</li>
+          <li><code>ems_coverage</code> local, state or national-model source by county</li>
+        </ul>
+        <p>Powered by Protocol Guide. Education and reference only, not medical direction.</p>
+      </article>
+      <article class="group">
+        <span class="tag">legal</span>
+        <h3>Judges and courts</h3>
+        <ul>
+          <li><code>legal_search_judges</code> by name and state</li>
+          <li><code>legal_get_judge</code> court, caseload, practice-area activity</li>
+          <li><code>legal_judge_recent_cases</code> recent public cases</li>
+          <li><code>legal_search_courts</code>, <code>legal_court_judges</code></li>
+        </ul>
+        <p>Powered by JudgeFinder. Informational, not legal advice.</p>
+      </article>
+      <article class="group">
+        <span class="tag">health</span>
+        <h3>Public health data</h3>
+        <ul>
+          <li><code>health_npi_lookup</code> CMS NPI registry, check-digit validated</li>
+          <li><code>health_drug_label</code> FDA labeling sections</li>
+          <li><code>health_drug_recalls</code> recall classes and reasons</li>
+          <li><code>health_drug_adverse_events</code> FAERS report counts</li>
+        </ul>
+        <p>CMS NPPES and openFDA. Not medical advice.</p>
+      </article>
+      <article class="group">
+        <span class="tag">models</span>
+        <h3>Open-model sizing</h3>
+        <ul>
+          <li><code>models_fit_check</code> which quants fit your GPU or cluster</li>
+          <li><code>models_estimate_vram</code> weights, KV cache, overhead</li>
+          <li><code>models_gguf_files</code> exact GGUF sizes per quant</li>
+          <li><code>models_search_hf</code>, <code>models_gpu_catalog</code></li>
+        </ul>
+        <p>KV cache math comes from the model's real config, including MoE and MLA.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="connect" aria-labelledby="c-h">
+    <h2 id="c-h">Connect it</h2>
+    <p class="sub">Server URL: <code data-origin="/mcp">/mcp</code>. Clients that support OAuth (Claude, ChatGPT) walk you through sign-in, where you paste a key or create a free one in one step. Command-line clients send the key as a Bearer token.</p>
+    <div class="tabs" role="tablist" aria-label="Client">
+      <button role="tab" aria-selected="true" aria-controls="p-claude" id="b-claude">Claude</button>
+      <button role="tab" aria-selected="false" aria-controls="p-chatgpt" id="b-chatgpt">ChatGPT</button>
+      <button role="tab" aria-selected="false" aria-controls="p-gemini" id="b-gemini">Gemini CLI</button>
+      <button role="tab" aria-selected="false" aria-controls="p-cc" id="b-cc">Claude Code</button>
+      <button role="tab" aria-selected="false" aria-controls="p-codex" id="b-codex">Codex CLI</button>
+    </div>
+    <div class="panel" id="p-claude" role="tabpanel" aria-labelledby="b-claude">
+      <p>Settings, Connectors, Add custom connector. Paste the URL below. Claude opens the sign-in page; paste your key or create a free one.</p>
+      <pre data-origin-block>__ORIGIN__/mcp</pre>
+    </div>
+    <div class="panel" id="p-chatgpt" role="tabpanel" aria-labelledby="b-chatgpt" hidden>
+      <p>Settings, Connectors, Advanced, turn on Developer mode, then Create. Choose MCP server, paste the URL, set authentication to OAuth.</p>
+      <pre data-origin-block>__ORIGIN__/mcp</pre>
+    </div>
+    <div class="panel" id="p-gemini" role="tabpanel" aria-labelledby="b-gemini" hidden>
+      <p>Add to <code>~/.gemini/settings.json</code>:</p>
+      <pre data-origin-block>{
+  "mcpServers": {
+    "meshvault": {
+      "httpUrl": "__ORIGIN__/mcp",
+      "headers": { "Authorization": "Bearer $MESHVAULT_API_KEY" }
+    }
+  }
+}</pre>
+    </div>
+    <div class="panel" id="p-cc" role="tabpanel" aria-labelledby="b-cc" hidden>
+      <pre data-origin-block>claude mcp add --transport http meshvault __ORIGIN__/mcp \
+  --header "Authorization: Bearer $MESHVAULT_API_KEY"</pre>
+    </div>
+    <div class="panel" id="p-codex" role="tabpanel" aria-labelledby="b-codex" hidden>
+      <p>Add to <code>~/.codex/config.toml</code>:</p>
+      <pre data-origin-block>[mcp_servers.meshvault]
+url = "__ORIGIN__/mcp"
+bearer_token_env_var = "MESHVAULT_API_KEY"</pre>
+    </div>
+    <p class="fine">Want to try before you sign up? <code data-origin="/mcp/try">/mcp/try</code> needs no key and allows 10 calls a day per network.</p>
+  </section>
+
+  <section id="pricing" aria-labelledby="p-h">
+    <h2 id="p-h">Pricing</h2>
+    <p class="sub">Both plans include all four tool sets. Quotas reset at 00:00 UTC. Calls that fail because a data source is down are not counted.</p>
+    <div class="plans">
+      <div class="plan">
+        <h3>Free</h3>
+        <div class="price">$0</div>
+        <ul><li>100 tool calls a day</li><li>All 18 tools</li><li>No card</li></ul>
+        <form id="free-form" novalidate>
+          <label class="small" for="free-email">Email for your key</label>
+          <input id="free-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <button class="btn" type="submit">Create free key</button>
+        </form>
+        <div class="out" id="free-out" aria-live="polite"></div>
+      </div>
+      <div class="plan pro">
+        <h3>Pro</h3>
+        <div class="price">$19<small> / month</small></div>
+        <ul><li>5,000 tool calls a day</li><li>Same 18 tools</li><li>Cancel any time from the billing portal</li></ul>
+        <form id="pro-form" novalidate>
+          <label class="small" for="pro-email">Email for your receipt and key</label>
+          <input id="pro-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <label class="small" for="pro-key">Already have a free key? Paste it to upgrade it</label>
+          <input id="pro-key" type="password" autocomplete="off" placeholder="mvc_… (optional)" spellcheck="false">
+          <button class="btn primary" type="submit">Subscribe with Stripe</button>
+        </form>
+        <div class="out" id="pro-out" aria-live="polite"></div>
+      </div>
+    </div>
+    <p class="fine" style="margin-top:16px">Payments are handled by Stripe. We never see your card. See the <a href="/terms">terms</a> and <a href="/privacy">privacy policy</a>.</p>
+  </section>
+  </main>
+
+  <footer>
+    <a href="/docs">Docs</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/thefiredev-cloud/meshvault-connectors">Source</a><a href="mailto:tanner@meshvault.ai">Support</a>
+    <p>Operated by The Fire Dev LLC (MeshVault). Data comes from third-party public sources and may be incomplete; verify before relying on it.</p>
+  </footer>
+</div>
+<script src="/app.js" defer></script>
+</body>
+</html>

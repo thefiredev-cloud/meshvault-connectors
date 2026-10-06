@@ -1,0 +1,19 @@
+# MeshVault Connectors
+
+> Remote MCP server (Streamable HTTP) with 18 read-only tools for AI assistants: EMS protocol lookup (Protocol Guide), judge and court lookup (JudgeFinder), public health data (CMS NPI registry, FDA openFDA), and open-weight model sizing (VRAM, GGUF sizes, GPU fit, Hugging Face search). OAuth 2.1 or API key. Free tier 100 calls a day; Pro $19 a month for 5,000 a day.
+
+- Server URL: /mcp (OAuth or Bearer key). Keyless trial: /mcp/try (10 calls a day per network).
+- Docs: /docs
+- Privacy: /privacy
+- Terms: /terms
+- Source (MIT): https://github.com/thefiredev-cloud/meshvault-connectors
+- Support: tanner@meshvault.ai
+
+## Tool groups
+- ems: ems_search_protocols, ems_get_protocol, ems_list_agencies, ems_coverage
+- legal: legal_search_judges, legal_get_judge, legal_judge_recent_cases, legal_search_courts, legal_court_judges
+- health: health_npi_lookup, health_drug_label, health_drug_recalls, health_drug_adverse_events
+- models: models_fit_check, models_estimate_vram, models_gguf_files, models_search_hf, models_gpu_catalog
+
+## Notices
+EMS results are education and reference only, not medical direction. Health data is not medical advice. Legal data is not legal advice. Verify against primary sources.
