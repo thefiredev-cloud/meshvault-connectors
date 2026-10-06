@@ -20,13 +20,18 @@ a { color: inherit; text-decoration-color: var(--acc); text-underline-offset: 3p
 a:hover { color: var(--acc); }
 :focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; border-radius: 4px; }
 .wrap { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
-header.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
-.brand { font-weight: 700; letter-spacing: -0.01em; text-decoration: none; display: inline-flex; gap: 10px; align-items: center; }
+header.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 18px; padding: 22px 0; }
+.brand { font-weight: 700; letter-spacing: -0.01em; text-decoration: none; display: inline-flex; gap: 10px; align-items: center; white-space: nowrap; padding: 6px 0; }
 .brand svg { width: 22px; height: 22px; }
-nav a { margin-left: 22px; font-size: 0.95rem; color: var(--mut); text-decoration: none; }
+nav a { margin-left: 22px; padding: 10px 0; display: inline-block; font-size: 0.95rem; color: var(--mut); text-decoration: none; }
 nav a:hover { color: var(--fg); }
 .hero { padding: 56px 0 40px; display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: start; }
 @media (max-width: 860px) { .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 28px; } nav a { margin-left: 14px; } }
+@media (max-width: 640px) {
+  nav { width: 100%; }
+  nav a { margin-left: 0; margin-right: 22px; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+}
 h1 { font-size: clamp(2rem, 4.4vw, 3.1rem); line-height: 1.08; letter-spacing: -0.025em; margin: 0 0 18px; font-weight: 750; }
 h2 { font-size: 1.55rem; letter-spacing: -0.015em; margin: 0 0 10px; line-height: 1.2; }
 h3 { font-size: 1.05rem; margin: 0 0 6px; }
@@ -71,10 +76,14 @@ input::placeholder { color: var(--mut); opacity: 1; }
 .panel p { color: var(--mut); margin: 0 0 12px; }
 .fine { color: var(--mut); font-size: 0.9rem; }
 footer { border-top: 1px solid var(--line); padding: 28px 0 56px; color: var(--mut); font-size: 0.9rem; }
-footer a { margin-right: 18px; }
+footer a { margin-right: 18px; display: inline-block; padding: 8px 0; }
 .prose { max-width: 44em; padding: 24px 0 60px; }
 .prose h2 { margin-top: 34px; }
 .prose p, .prose li { color: var(--mut); max-width: 34em; }
+.faq details { border-top: 1px dashed var(--line); padding: 4px 0; }
+.faq details:first-child { border-top: 0; }
+.faq summary { cursor: pointer; font-weight: 650; padding: 12px 0; }
+.faq details p { margin: 0 0 14px; color: var(--mut); max-width: 40em; }
 .prose td { max-width: 30em; }
 .prose table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.93rem; }
 .prose th, .prose td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }

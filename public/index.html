@@ -5,11 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MeshVault Connectors: EMS, legal, health and model-sizing tools for ChatGPT, Claude and Gemini</title>
 <meta name="description" content="Remote MCP connectors that give ChatGPT, Claude and Gemini read-only tools for EMS protocols, judges and courts, public health data, and GPU fit math for open-weight models. Free tier, Pro at $19 a month.">
+<meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131415" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://thefiredev.com/connectors">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/style.css">
 <meta property="og:title" content="MeshVault Connectors">
 <meta property="og:description" content="Read-only MCP tools for EMS protocols, judges and courts, public health data and open-model sizing.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="MeshVault Connectors">
+<meta property="og:url" content="https://thefiredev.com/connectors">
+<meta property="og:image" content="https://thefiredev.com/connectors/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="MeshVault Connectors: real data for your AI assistant. EMS protocols, judges and courts, public health data, open-model sizing.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MeshVault Connectors">
+<meta name="twitter:description" content="Read-only MCP tools for EMS protocols, judges and courts, public health data and open-model sizing.">
+<meta name="twitter:image" content="https://thefiredev.com/connectors/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://thefiredev.com/connectors#app","name":"MeshVault Connectors","url":"https://thefiredev.com/connectors","image":"https://thefiredev.com/connectors/og.png","applicationCategory":"DeveloperApplication","operatingSystem":"Any (remote MCP server)","description":"A remote MCP server that gives ChatGPT, Claude, Codex and Gemini 18 read-only tools for EMS protocols, judges and courts, public health data and open-model GPU sizing. Every answer names its source.","publisher":{"@type":"Organization","@id":"https://thefiredev.com/#org","name":"TheFireDev","legalName":"The Fire Dev LLC","url":"https://thefiredev.com"},"offers":[{"@type":"Offer","name":"Free","price":0,"priceCurrency":"USD","url":"https://thefiredev.com/connectors#pricing","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Pro","url":"https://thefiredev.com/connectors#pricing","availability":"https://schema.org/InStock","priceSpecification":{"@type":"UnitPriceSpecification","price":19,"priceCurrency":"USD","unitText":"MONTH"}}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TheFireDev","item":"https://thefiredev.com"},{"@type":"ListItem","position":2,"name":"MeshVault Connectors","item":"https://thefiredev.com/connectors"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is an MCP connector?","acceptedAnswer":{"@type":"Answer","text":"MCP is the Model Context Protocol, an open standard that lets an AI assistant call tools on a server. A connector is one such server URL that you add to ChatGPT, Claude, Codex or Gemini. This one gives the assistant 18 read-only tools that look up public data and name the source of every answer."}},{"@type":"Question","name":"Is it free?","acceptedAnswer":{"@type":"Answer","text":"Yes. A free key allows 100 tool calls a day with no card. Pro is $19 a month for 5,000 tool calls a day. A keyless trial endpoint allows 10 calls a day per network."}},{"@type":"Question","name":"Does it give medical or legal advice?","acceptedAnswer":{"@type":"Answer","text":"No. EMS results are education and reference text from published protocol books, not medical direction. Judge and court results are public records for information only, not legal advice. Check primary sources before you rely on a result."}},{"@type":"Question","name":"Can it change anything on my accounts?","acceptedAnswer":{"@type":"Answer","text":"No. All 18 tools are read-only. They look up public data and return it with its source."}},{"@type":"Question","name":"Where does the data come from?","acceptedAnswer":{"@type":"Answer","text":"Protocol Guide for EMS protocols, JudgeFinder for judges and courts, CMS NPPES and openFDA for public health data, and Hugging Face for open-model sizing."}}]}</script>
 </head>
 <body>
 <div class="wrap">
@@ -59,7 +74,7 @@ models_fit_check
           <li><code>ems_list_agencies</code> agencies with books loaded</li>
           <li><code>ems_coverage</code> local, state or national-model source by county</li>
         </ul>
-        <p>Powered by Protocol Guide. Education and reference only, not medical direction.</p>
+        <p>Powered by Protocol Guide. Education and reference only, not medical direction. <a href="/ems">EMS tool details</a>.</p>
       </article>
       <article class="group">
         <span class="tag">legal</span>
@@ -70,7 +85,7 @@ models_fit_check
           <li><code>legal_judge_recent_cases</code> recent public cases</li>
           <li><code>legal_search_courts</code>, <code>legal_court_judges</code></li>
         </ul>
-        <p>Powered by JudgeFinder. Informational, not legal advice.</p>
+        <p>Powered by JudgeFinder. Informational, not legal advice. <a href="/legal">Judge and court tool details</a>.</p>
       </article>
       <article class="group">
         <span class="tag">health</span>
@@ -170,10 +185,21 @@ bearer_token_env_var = "MESHVAULT_API_KEY"</pre>
     </div>
     <p class="fine" style="margin-top:16px">Payments are handled by Stripe. We never see your card. See the <a href="/terms">terms</a> and <a href="/privacy">privacy policy</a>.</p>
   </section>
+
+  <section id="faq" aria-labelledby="f-h">
+    <h2 id="f-h">Questions</h2>
+    <div class="faq">
+      <details><summary>What is an MCP connector?</summary><p>MCP is the Model Context Protocol, an open standard that lets an AI assistant call tools on a server. A connector is one such server URL that you add to ChatGPT, Claude, Codex or Gemini. This one gives the assistant 18 read-only tools that look up public data and name the source of every answer.</p></details>
+      <details><summary>Is it free?</summary><p>Yes. A free key allows 100 tool calls a day with no card. Pro is $19 a month for 5,000 tool calls a day. A keyless trial endpoint allows 10 calls a day per network.</p></details>
+      <details><summary>Does it give medical or legal advice?</summary><p>No. EMS results are education and reference text from published protocol books, not medical direction. Judge and court results are public records for information only, not legal advice. Check primary sources before you rely on a result.</p></details>
+      <details><summary>Can it change anything on my accounts?</summary><p>No. All 18 tools are read-only. They look up public data and return it with its source.</p></details>
+      <details><summary>Where does the data come from?</summary><p>Protocol Guide for EMS protocols, JudgeFinder for judges and courts, CMS NPPES and openFDA for public health data, and Hugging Face for open-model sizing.</p></details>
+    </div>
+  </section>
   </main>
 
   <footer>
-    <a href="/docs">Docs</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/thefiredev-cloud/meshvault-connectors">Source</a><a href="mailto:tanner@meshvault.ai">Support</a>
+    <a href="/docs">Docs</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://github.com/thefiredev-cloud/meshvault-connectors">Source</a><a href="mailto:tanner@meshvault.ai">Support</a><a href="https://thefiredev.com">TheFireDev</a>
     <p>Operated by The Fire Dev LLC (MeshVault). Data comes from third-party public sources and may be incomplete; verify before relying on it.</p>
   </footer>
 </div>
