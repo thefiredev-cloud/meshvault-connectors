@@ -81,7 +81,8 @@ export class BlobStore implements Store {
       return { etag: res.etag };
     } catch (err) {
       if (err instanceof BlobPreconditionFailedError) throw new ConflictError(path);
-      if (err instanceof BlobError && /already exists/i.test(err.message)) throw new ConflictError(path);
+      // Concurrent writers to one blob surface as a plain BlobError (HTTP 409), not a precondition failure.
+      if (err instanceof BlobError && /already exists|conflicting operation|conditional request/i.test(err.message)) throw new ConflictError(path);
       throw err;
     }
   }
