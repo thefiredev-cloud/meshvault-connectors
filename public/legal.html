@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Judge and court lookup MCP server for Claude and ChatGPT · MeshVault Connectors</title>
+<meta name="description" content="Look up judges, courts, caseloads and recent public cases from Claude, ChatGPT, Codex or Gemini. Five read-only MCP tools backed by JudgeFinder. Informational, not legal advice.">
+<link rel="canonical" href="https://thefiredev.com/connectors/legal">
+<meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131415" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MeshVault Connectors">
+<meta property="og:title" content="Judge and court lookup MCP server for Claude and ChatGPT">
+<meta property="og:description" content="Five read-only MCP tools for judges, courts, caseloads and recent public cases, backed by JudgeFinder. Informational, not legal advice.">
+<meta property="og:url" content="https://thefiredev.com/connectors/legal">
+<meta property="og:image" content="https://thefiredev.com/connectors/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://thefiredev.com/connectors/legal#page","url":"https://thefiredev.com/connectors/legal","name":"Judge and court lookup MCP server for Claude and ChatGPT","description":"Five read-only MCP tools for judges, courts, caseloads and recent public cases, backed by JudgeFinder. Informational, not legal advice.","isPartOf":{"@id":"https://thefiredev.com/connectors#app"},"about":"Judges and courts"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"TheFireDev","item":"https://thefiredev.com"},{"@type":"ListItem","position":2,"name":"MeshVault Connectors","item":"https://thefiredev.com/connectors"},{"@type":"ListItem","position":3,"name":"Judges and courts","item":"https://thefiredev.com/connectors/legal"}]}]}</script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="/">MeshVault Connectors</a><nav aria-label="Primary"><a href="/#pricing">Pricing</a><a href="/docs">Docs</a></nav></header>
+  <main class="prose">
+    <h1>Judge and court lookup MCP server for Claude and ChatGPT</h1>
+    <p>Add one URL to your AI assistant and it can find a judge by name and state, pull a judge's court, caseload and practice-area activity, list recent public cases, and search courts. Results come from JudgeFinder and say where they came from.</p>
+    <p class="cta"><a class="btn primary" href="/#pricing">Get a free key</a><a class="btn" href="/#connect">How to connect</a></p>
+
+    <h2>The five tools</h2>
+    <table>
+      <tr><td>legal_search_judges</td><td>query, state, limit.</td></tr>
+      <tr><td>legal_get_judge</td><td>slug. Court, caseload, practice-area activity.</td></tr>
+      <tr><td>legal_judge_recent_cases</td><td>judge_id, limit.</td></tr>
+      <tr><td>legal_search_courts</td><td>query, state, county, type, limit.</td></tr>
+      <tr><td>legal_court_judges</td><td>court_id, limit.</td></tr>
+    </table>
+
+    <h2>Example</h2>
+    <p>Ask your assistant: <em>Find judges named Rivera in California, then show the recent cases for the first one.</em> It calls the tools in order:</p>
+    <pre aria-label="Example tool calls">legal_search_judges
+  query: "Rivera"
+  state: "CA"
+
+legal_judge_recent_cases
+  judge_id: (id from the first result)
+  limit: 10</pre>
+
+    <h2>Where the data comes from</h2>
+    <p>The tools read from <a href="https://judgefinder.vercel.app">JudgeFinder</a>, a judge lookup built on CourtListener docket metadata, built by the same operator. Records can be incomplete or out of date, so each answer names its source and the assistant can send you there to check.</p>
+
+    <h2>Read this before you use it</h2>
+    <p>The results are public-record information. They are not legal advice, and they are not a basis for deciding anything about a case on their own. Verify against the court's own records.</p>
+
+    <h2>Connect it</h2>
+    <p>Server URL: <code>https://thefiredev.com/mcp</code>. Claude and ChatGPT walk you through sign-in, where you paste a key or create a free one. A free key allows 100 tool calls a day with no card. Steps for each client are on the <a href="/#connect">connect section</a> and in the <a href="/docs">docs</a>. The same server also has <a href="/ems">EMS protocol tools</a>, public health data and open-model sizing.</p>
+  </main>
+  <footer>
+    <a href="/">All connectors</a><a href="/docs">Docs</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://thefiredev.com">TheFireDev</a>
+  </footer>
+</div>
+</body>
+</html>

@@ -80,6 +80,10 @@ footer a { margin-right: 18px; display: inline-block; padding: 8px 0; }
 .prose { max-width: 44em; padding: 24px 0 60px; }
 .prose h2 { margin-top: 34px; }
 .prose p, .prose li { color: var(--mut); max-width: 34em; }
+.faq details { border-top: 1px dashed var(--line); padding: 4px 0; }
+.faq details:first-child { border-top: 0; }
+.faq summary { cursor: pointer; font-weight: 650; padding: 12px 0; }
+.faq details p { margin: 0 0 14px; color: var(--mut); max-width: 40em; }
 .prose td { max-width: 30em; }
 .prose table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.93rem; }
 .prose th, .prose td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
