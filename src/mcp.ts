@@ -2,7 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import { PLANS, SERVER_INFO, type Env } from "./config.js";
+import { PLANS, SERVER_INFO, pricingUrl, type Env } from "./config.js";
 import { UpstreamError } from "./lib/http.js";
 import { consume, refund, type Principal } from "./quota.js";
 import type { Store } from "./store.js";
@@ -53,10 +53,10 @@ export function createMcpServer(ctx: McpContext): McpServer {
         const quota = await consume(ctx.store, ctx.principal);
         if (!quota.allowed) {
           const plan = PLANS[quota.plan];
-          const upgrade = quota.plan === "pro" ? "Your Pro daily limit resets at 00:00 UTC." : `Upgrade or get a key: ${ctx.baseUrl}/#pricing`;
+          const upgrade = quota.plan === "pro" ? "Your Pro daily limit resets at 00:00 UTC." : `Upgrade or get a key: ${pricingUrl(ctx.env, ctx.baseUrl)}`;
           return failure(
             `Daily quota reached for the ${plan.label} plan (${quota.used}/${quota.limit} calls). Resets ${quota.resetsAt}. ${upgrade}`,
-            { error: "quota_exceeded", plan: quota.plan, used: quota.used, limit: quota.limit, resets_at: quota.resetsAt, upgrade_url: `${ctx.baseUrl}/#pricing` },
+            { error: "quota_exceeded", plan: quota.plan, used: quota.used, limit: quota.limit, resets_at: quota.resetsAt, upgrade_url: pricingUrl(ctx.env, ctx.baseUrl) },
           );
         }
         try {

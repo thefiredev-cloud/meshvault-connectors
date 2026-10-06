@@ -9,7 +9,7 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { SignJWT, jwtVerify, errors as joseErrors } from "jose";
 import type { Context, Hono } from "hono";
-import { required } from "./config.js";
+import { docsUrl, pricingUrl, required } from "./config.js";
 import type { Deps } from "./deps.js";
 import { issueKey, getKeyById, verifyRawKey, sha256Hex } from "./keys.js";
 import { hit } from "./quota.js";
@@ -79,11 +79,11 @@ function json(body: unknown, status = 200, extra: Record<string, string> = {}): 
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store", ...extra } });
 }
 
-export function protectedResourceMetadata(base: string) {
-  return { resource: `${base}/mcp`, authorization_servers: [base], bearer_methods_supported: ["header"], scopes_supported: ["mcp"], resource_name: "MeshVault Connectors", resource_documentation: `${base}/docs` };
+export function protectedResourceMetadata(base: string, docs: string) {
+  return { resource: `${base}/mcp`, authorization_servers: [base], bearer_methods_supported: ["header"], scopes_supported: ["mcp"], resource_name: "MeshVault Connectors", resource_documentation: docs };
 }
 
-export function authServerMetadata(base: string) {
+export function authServerMetadata(base: string, docs: string) {
   return {
     issuer: base,
     authorization_endpoint: `${base}/oauth/authorize`,
@@ -94,7 +94,7 @@ export function authServerMetadata(base: string) {
     code_challenge_methods_supported: ["S256"],
     token_endpoint_auth_methods_supported: ["none"],
     scopes_supported: ["mcp"],
-    service_documentation: `${base}/docs`,
+    service_documentation: docs,
   };
 }
 
@@ -121,7 +121,7 @@ async function readAuthReq(deps: Deps, token: string): Promise<AuthReq | null> {
   }
 }
 
-function authorizePage(opts: { ctxToken: string; clientName: string; error?: string; issuedKey?: string; base: string }): Response {
+function authorizePage(opts: { ctxToken: string; clientName: string; error?: string; issuedKey?: string; pricing: string }): Response {
   const err = opts.error ? `<p class="err" role="alert">${escapeHtml(opts.error)}</p>` : "";
   const body = opts.issuedKey
     ? `<h1>Your free key</h1>
@@ -146,7 +146,7 @@ ${err}
 <input type="hidden" name="ctx" value="${escapeHtml(opts.ctxToken)}">
 <label for="email">Get a free key (100 calls a day)</label>
 <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-<p class="fine">We use your email only for service notices. No card needed. Upgrade any time at <a href="${escapeHtml(opts.base)}/#pricing">pricing</a>.</p>
+<p class="fine">We use your email only for service notices. No card needed. Upgrade any time at <a href="${escapeHtml(opts.pricing)}">pricing</a>.</p>
 <button type="submit" name="action" value="free" class="secondary">Create free key</button>
 </form>`;
   return pageShell("Authorize MeshVault Connectors", body, {
@@ -156,10 +156,14 @@ ${err}
 }
 
 export function registerOAuthRoutes(app: Hono, deps: Deps): void {
-  app.get("/.well-known/oauth-protected-resource", (c) => c.json(protectedResourceMetadata(originOf(c, deps))));
-  app.get("/.well-known/oauth-protected-resource/mcp", (c) => c.json(protectedResourceMetadata(originOf(c, deps))));
-  app.get("/.well-known/oauth-authorization-server", (c) => c.json(authServerMetadata(originOf(c, deps))));
-  app.get("/.well-known/openid-configuration", (c) => c.json(authServerMetadata(originOf(c, deps))));
+  const meta = (c: Context) => {
+    const base = originOf(c, deps);
+    return { base, docs: docsUrl(deps.env, base) };
+  };
+  app.get("/.well-known/oauth-protected-resource", (c) => c.json(protectedResourceMetadata(meta(c).base, meta(c).docs)));
+  app.get("/.well-known/oauth-protected-resource/mcp", (c) => c.json(protectedResourceMetadata(meta(c).base, meta(c).docs)));
+  app.get("/.well-known/oauth-authorization-server", (c) => c.json(authServerMetadata(meta(c).base, meta(c).docs)));
+  app.get("/.well-known/openid-configuration", (c) => c.json(authServerMetadata(meta(c).base, meta(c).docs)));
 
   app.post("/oauth/register", async (c) => {
     let body: Record<string, unknown>;
@@ -209,7 +213,7 @@ export function registerOAuthRoutes(app: Hono, deps: Deps): void {
     if (!q["code_challenge"] || q["code_challenge_method"] !== "S256") return fail("invalid_request", "PKCE with code_challenge_method=S256 is required.");
     if (!/^[A-Za-z0-9_-]{43}$/.test(q["code_challenge"])) return fail("invalid_request", "Malformed code_challenge.");
     const ctxToken = await signAuthReq(deps, { cid: q["client_id"] as string, ru: redirectUri, cc: q["code_challenge"], scope: "mcp", ...(q["state"] ? { state: q["state"] } : {}) });
-    return authorizePage({ ctxToken, clientName: client.client_name ?? "your AI client", base: originOf(c, deps) });
+    return authorizePage({ ctxToken, clientName: client.client_name ?? "your AI client", pricing: pricingUrl(deps.env, originOf(c, deps)) });
   });
 
   app.post("/oauth/authorize", async (c) => {
@@ -221,21 +225,22 @@ export function registerOAuthRoutes(app: Hono, deps: Deps): void {
     if (!client) return c.text("Unknown client.", 400);
     const clientName = client.client_name ?? "your AI client";
     const base = originOf(c, deps);
+    const pricing = pricingUrl(deps.env, base);
 
     let keyId: string | undefined;
     if (form["action"] === "free") {
       const email = typeof form["email"] === "string" ? form["email"].trim() : "";
-      if (!/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/.test(email)) return authorizePage({ ctxToken, clientName, base, error: "Enter a valid email address." });
+      if (!/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/.test(email)) return authorizePage({ ctxToken, clientName, pricing, error: "Enter a valid email address." });
       const ip = clientIp(c);
       const ok = await hit(deps.store, "freekey", `ip:${sha256Hex(`${required(deps.env, "APP_SECRET")}|${ip}`).slice(0, 20)}`, 5);
-      if (!ok) return authorizePage({ ctxToken, clientName, base, error: "Too many free keys from this network today. Try again tomorrow or use an existing key." });
+      if (!ok) return authorizePage({ ctxToken, clientName, pricing, error: "Too many free keys from this network today. Try again tomorrow or use an existing key." });
       const { rawKey } = await issueKey(deps.store, { plan: "free", origin: "free", email });
-      return authorizePage({ ctxToken, clientName, base, issuedKey: rawKey });
+      return authorizePage({ ctxToken, clientName, pricing, issuedKey: rawKey });
     }
 
     const raw = typeof form["api_key"] === "string" ? form["api_key"].trim() : "";
     const rec = raw ? await verifyRawKey(deps.store, raw) : null;
-    if (!rec) return authorizePage({ ctxToken, clientName, base, error: "That key was not recognized or has been revoked." });
+    if (!rec) return authorizePage({ ctxToken, clientName, pricing, error: "That key was not recognized or has been revoked." });
     keyId = rec.id;
 
     const jti = b64url(randomBytes(16));

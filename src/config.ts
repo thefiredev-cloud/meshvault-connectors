@@ -39,6 +39,16 @@ export function baseUrl(env: Env, requestUrl?: string): string {
   return "http://localhost:3000";
 }
 
+/**
+ * Where the marketing site lives. Empty when the service owns its host; "/connectors" when it is mounted
+ * under another site (the static pages are then served from that path). Server-side links use these helpers.
+ */
+function landingBase(env: Env, base: string): string {
+  return `${base}${(env.get("LANDING_PATH") ?? "").replace(/\/+$/, "")}`;
+}
+export const pricingUrl = (env: Env, base: string): string => `${landingBase(env, base)}${env.get("LANDING_PATH") ? "" : "/"}#pricing`;
+export const docsUrl = (env: Env, base: string): string => `${landingBase(env, base)}/docs`;
+
 export const SERVER_INFO = {
   name: "meshvault-connectors",
   title: "MeshVault Connectors",

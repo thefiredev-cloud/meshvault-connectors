@@ -7,7 +7,7 @@
  */
 import { randomBytes } from "node:crypto";
 import type Stripe from "stripe";
-import { required } from "./config.js";
+import { docsUrl, pricingUrl, required } from "./config.js";
 import type { Deps } from "./deps.js";
 import { getKeyById, issueKey, keyIdForCustomer, openKey, sealKey, setCustomerKey, updateKey } from "./keys.js";
 import { ConflictError, update } from "./store.js";
@@ -37,7 +37,7 @@ export async function createCheckoutSession(deps: Deps, input: CheckoutInput): P
     mode: "subscription",
     line_items: [{ price, quantity: 1 }],
     success_url: `${input.base}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${input.base}/#pricing`,
+    cancel_url: pricingUrl(deps.env, input.base),
     allow_promotion_codes: true,
     metadata: meta,
     subscription_data: { metadata: meta },
@@ -52,7 +52,7 @@ export async function createCheckoutSession(deps: Deps, input: CheckoutInput): P
 export async function createPortalSession(deps: Deps, keyId: string, base: string): Promise<string> {
   const rec = await getKeyById(deps.store, keyId, true);
   if (!rec?.stripeCustomerId) throw new Error("no_customer");
-  const s = await deps.stripe().billingPortal.sessions.create({ customer: rec.stripeCustomerId, return_url: `${base}/docs` });
+  const s = await deps.stripe().billingPortal.sessions.create({ customer: rec.stripeCustomerId, return_url: docsUrl(deps.env, base) });
   return s.url;
 }
 

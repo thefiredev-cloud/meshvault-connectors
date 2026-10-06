@@ -4,7 +4,7 @@
   "title": "MeshVault Connectors",
   "description": "Read-only tools for EMS protocols, judges and courts, public health data (NPI, FDA) and open-model GPU sizing.",
   "version": "0.1.0",
-  "websiteUrl": "https://github.com/thefiredev-cloud/meshvault-connectors",
+  "websiteUrl": "https://thefiredev.com/connectors",
   "repository": {
     "url": "https://github.com/thefiredev-cloud/meshvault-connectors",
     "source": "github"
@@ -12,7 +12,7 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://__PRODUCTION_HOST__/mcp",
+      "url": "https://thefiredev.com/mcp",
       "headers": [
         {
           "name": "Authorization",
