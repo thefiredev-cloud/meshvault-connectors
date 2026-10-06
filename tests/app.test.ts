@@ -4,6 +4,9 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { describe, expect, it } from "vitest";
 import { clearKeyCache } from "../src/keys.js";
 import { BASE, makeApp, upstream } from "./helpers.js";
+import { clientIp } from "../src/oauth.js";
+import type { Context } from "hono";
+
 
 const pgSearch = {
   result: { data: { json: { results: [{ id: 235335, protocolNumber: "1210", protocolTitle: "Cardiac Arrest", section: "Cardiac", content: "Epinephrine may improve outcomes...", sourcePdfUrl: "https://example.org/1210.pdf", relevanceScore: 84.6, agencyName: "Los Angeles County EMS Agency", stateCode: "CA", protocolYear: 2018 }], totalFound: 1 } } },
@@ -31,6 +34,23 @@ async function freeKey(fetchApp: typeof fetch, email = "dev@example.com"): Promi
 }
 
 const text = (r: unknown) => ((r as { content: { text: string }[] }).content[0] as { text: string }).text;
+
+describe("Vercel client IP attribution", () => {
+  it("rejects client-supplied forwarded prefixes rather than assigning quota to the first value", () => {
+    const context = { req: { header: (name: string) =>
+      name === "x-forwarded-for" ? "203.0.113.21, 198.51.100.10" : "203.0.113.21" } } as Context;
+    expect(clientIp(context)).toBe("unknown");
+  });
+
+  it("uses one platform-provided IP, never an x-real-ip fallback", () => {
+    const context = { req: { header: (name: string) =>
+      name === "x-forwarded-for" ? "198.51.100.10" : "203.0.113.21" } } as Context;
+    expect(clientIp(context)).toBe("198.51.100.10");
+    const missing = { req: { header: (name: string) =>
+      name === "x-real-ip" ? "203.0.113.21" : undefined } } as Context;
+    expect(clientIp(missing)).toBe("unknown");
+  });
+});
 
 describe("MCP over streamable HTTP", () => {
   it("rejects missing and bad credentials with OAuth discovery hints", async () => {

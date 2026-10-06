@@ -7,6 +7,7 @@
  * - Access tokens are short-lived HS256 JWTs bound to the key id; refresh tokens rotate with replay detection that revokes the family.
  */
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { isIP } from "node:net";
 import { SignJWT, jwtVerify, errors as joseErrors } from "jose";
 import type { Context, Hono } from "hono";
 import { docsUrl, pricingUrl, required } from "./config.js";
@@ -340,8 +341,10 @@ export function registerOAuthRoutes(app: Hono, deps: Deps): void {
 }
 
 export function clientIp(c: Context): string {
-  const xff = c.req.header("x-forwarded-for");
-  return (xff?.split(",")[0]?.trim() || c.req.header("x-real-ip") || "unknown").slice(0, 64);
+  // Vercel overwrites X-Forwarded-For with one client IP. Never use a
+  // client-supplied list prefix or the untrusted X-Real-IP fallback.
+  const ip = c.req.header("x-forwarded-for")?.trim();
+  return ip && isIP(ip) ? ip : "unknown";
 }
 
 /** Validates an OAuth access token minted above. Returns the key id or null. */
