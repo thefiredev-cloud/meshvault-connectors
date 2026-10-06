@@ -180,6 +180,12 @@ describe("OAuth 2.1 flow", () => {
     // Code replay fails.
     const replay = await tokenReq(fetchApp, { grant_type: "authorization_code", code, client_id, redirect_uri: redirect, code_verifier: verifier });
     expect(replay.status).toBe(400);
+    const accessAfterReplay = await fetchApp(`${BASE}/mcp`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${tok.access_token}`, "content-type": "application/json" },
+      body: "{}",
+    });
+    expect(accessAfterReplay.status).toBe(401);
 
     // Refresh rotates; reuse of the old token revokes the family.
     const refreshed = await tokenReq(fetchApp, { grant_type: "refresh_token", refresh_token: tok.refresh_token, client_id });
@@ -202,7 +208,28 @@ describe("OAuth 2.1 flow", () => {
     const reuse = await tokenReq(fetchApp, { grant_type: "refresh_token", refresh_token: first.refresh_token, client_id });
     expect(reuse.status).toBe(400);
     const afterRevoke = await tokenReq(fetchApp, { grant_type: "refresh_token", refresh_token: next.refresh_token, client_id });
+    const apiAfterRevoke = await fetchApp(`${BASE}/mcp`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${next.access_token}`, "content-type": "application/json" },
+      body: "{}",
+    });
+    expect(apiAfterRevoke.status).toBe(401);
     expect(afterRevoke.status).toBe(400);
+  });
+
+  it("allows only one winner when two requests rotate the same refresh token concurrently", async () => {
+    const { fetchApp } = makeApp();
+    const key = await freeKey(fetchApp);
+    const redirect = "http://127.0.0.1:33418/callback";
+    const { client_id } = await registerClient(fetchApp, redirect);
+    const { verifier, challenge } = pkce();
+    const code = new URL((await authorize(fetchApp, client_id, redirect, challenge, key)).headers.get("location")!).searchParams.get("code")!;
+    const first = (await (await tokenReq(fetchApp, { grant_type: "authorization_code", code, client_id, redirect_uri: redirect, code_verifier: verifier })).json()) as { refresh_token: string };
+    const requests = await Promise.all([
+      tokenReq(fetchApp, { grant_type: "refresh_token", refresh_token: first.refresh_token, client_id }),
+      tokenReq(fetchApp, { grant_type: "refresh_token", refresh_token: first.refresh_token, client_id }),
+    ]);
+    expect(requests.map((r) => r.status).sort()).toEqual([200, 400]);
   });
 
   it("rejects unregistered redirect URIs, plain PKCE, and tampered tokens", async () => {

@@ -53,6 +53,8 @@ public/               Landing page, docs, privacy, terms
 
 State lives in one private Vercel Blob store (`keys/`, `usage/`, `customers/`, `events/`, `oauth/`). Writes use ETag compare-and-swap, so concurrent calls cannot overspend a quota.
 
+OAuth refresh tokens are claimed by a compare-and-swap update. A reused token, including a losing concurrent refresh request, revokes the family. Access tokens check that family on each request, so revocation does not wait for the token's one-hour expiry.
+
 ### Billing behaviour
 
 - Checkout with an existing key upgrades that key. Cancellation downgrades it to Free.
