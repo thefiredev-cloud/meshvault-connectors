@@ -273,6 +273,7 @@ describe("Stripe billing", () => {
     const again = await (await fetchApp(`${BASE}/billing/success?session_id=cs_test_abc`)).text();
     expect(/mvc_[A-Za-z0-9_-]{43}/.exec(again)![0]).toBe(key);
 
+    stripe.subscriptionStates.set("sub_123", "canceled");
     const del = await post(fetchApp, evt("customer.subscription.deleted", { id: "sub_123", customer: "cus_123", status: "canceled", metadata: { app: "meshvault-connectors", key_id: "" } }));
     expect(del.status).toBe(200);
     clearKeyCache();
@@ -291,10 +292,54 @@ describe("Stripe billing", () => {
     clearKeyCache();
     const u1 = (await (await fetchApp(`${BASE}/api/usage`, { headers: { authorization: `Bearer ${key}` } })).json()) as { plan: string };
     expect(u1.plan).toBe("pro");
+    stripe.subscriptionStates.set("sub_123", "canceled");
     await post(fetchApp, evt("customer.subscription.deleted", { id: "sub_123", customer: "cus_123", status: "canceled", metadata: { app: "meshvault-connectors", key_id: id } }, "evt_del1"));
     clearKeyCache();
     const u2 = (await (await fetchApp(`${BASE}/api/usage`, { headers: { authorization: `Bearer ${key}` } })).json()) as { plan: string };
     expect(u2.plan).toBe("free");
+  });
+
+  it("does not restore Pro from an old checkout after the subscription ends", async () => {
+    const { fetchApp, stripe } = makeApp();
+    const key = await freeKey(fetchApp);
+    const keyId = createHash("sha256").update(key).digest("hex").slice(0, 24);
+    const session = paidSession({ id: "cs_test_replay", metadata: { app: "meshvault-connectors", key_id: keyId } });
+    stripe.sessions.set(session.id, session);
+    expect((await post(fetchApp, evt("checkout.session.completed", session, "evt_replay_checkout"))).status).toBe(200);
+    stripe.subscriptionStates.set("sub_123", "canceled");
+    expect((await post(fetchApp, evt("customer.subscription.deleted", { id: "sub_123", customer: "cus_123", status: "canceled", metadata: { app: "meshvault-connectors", key_id: keyId } }, "evt_replay_cancel"))).status).toBe(200);
+    clearKeyCache();
+    const replay = await fetchApp(`${BASE}/billing/success?session_id=${session.id}`);
+    expect(replay.status).not.toBe(500);
+    clearKeyCache();
+    const usage = (await (await fetchApp(`${BASE}/api/usage`, { headers: { authorization: `Bearer ${key}` } })).json()) as { plan: string };
+    expect(usage.plan).toBe("free");
+  });
+
+  it("does not re-grant Pro from a late active subscription event", async () => {
+    const { fetchApp, stripe } = makeApp();
+    const key = await freeKey(fetchApp);
+    const keyId = createHash("sha256").update(key).digest("hex").slice(0, 24);
+    const session = paidSession({ metadata: { app: "meshvault-connectors", key_id: keyId } });
+    await post(fetchApp, evt("checkout.session.completed", session, "evt_late_checkout"));
+    stripe.subscriptionStates.set("sub_123", "canceled");
+    await post(fetchApp, evt("customer.subscription.deleted", { id: "sub_123", customer: "cus_123", status: "canceled", metadata: { app: "meshvault-connectors", key_id: keyId } }, "evt_late_cancel"));
+    const late = await post(fetchApp, evt("customer.subscription.updated", { id: "sub_123", customer: "cus_123", status: "active", metadata: { app: "meshvault-connectors", key_id: keyId } }, "evt_late_active"));
+    expect(late.status).toBe(200);
+    clearKeyCache();
+    const usage = (await (await fetchApp(`${BASE}/api/usage`, { headers: { authorization: `Bearer ${key}` } })).json()) as { plan: string };
+    expect(usage.plan).toBe("free");
+  });
+
+  it("does not issue a Pro key for a different subscription price", async () => {
+    const { fetchApp, stripe } = makeApp();
+    stripe.subscriptionPrices.set("sub_123", "price_other");
+    stripe.sessions.set("cs_test_abc", paidSession());
+    const response = await post(fetchApp, evt("checkout.session.completed", paidSession(), "evt_wrong_price"));
+    expect(response.status).toBe(200);
+    const page = await fetchApp(`${BASE}/billing/success?session_id=cs_test_abc`);
+    expect(page.status).toBe(202);
+    expect((await page.text())).not.toContain("mvc_");
   });
 
   it("rejects webhooks with bad signatures and ignores foreign events", async () => {

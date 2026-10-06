@@ -57,7 +57,7 @@ State lives in one private Vercel Blob store (`keys/`, `usage/`, `customers/`, `
 
 - Checkout with an existing key upgrades that key. Cancellation downgrades it to Free.
 - Checkout without a key issues a new Pro key, shown once on the confirmation page (sealed with AES-256-GCM for 24 hours). Cancellation revokes it.
-- Fulfillment runs from both the webhook and the confirmation page and is idempotent.
+- Fulfillment runs from both the webhook and the confirmation page. Both check Stripe's current subscription status, customer and configured Pro price before granting access; late event snapshots and reused success links cannot restore a canceled subscription.
 - Webhook events handled: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.updated`, `customer.subscription.deleted`.
 
 ## Develop
