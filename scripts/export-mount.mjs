@@ -50,11 +50,11 @@ rmSync(dest, { recursive: true, force: true });
 cpSync(join(root, "public"), dest, { recursive: true });
 rmSync(join(dest, "robots.txt"));
 
-const PAGES = "style\\.css|app\\.js|favicon\\.svg|docs|privacy|terms|llms\\.txt";
+const PAGES = "style\\.css|app\\.js|favicon\\.svg|docs|privacy|terms|ems|legal|llms\\.txt";
 function rewrite(text, isHtml) {
   let t = text;
   if (isHtml) {
-    t = t.replace(/(href|src)="\/#pricing"/g, `$1="${prefix}#pricing"`);
+    t = t.replace(/(href|src)="\/#([a-z-]+)"/g, `$1="${prefix}#$2"`);
     t = t.replace(/(href|src)="\/"/g, `$1="${prefix}"`);
     t = t.replace(new RegExp(`(href|src)="/(${PAGES})"`, "g"), `$1="${prefix}/$2"`);
   } else {

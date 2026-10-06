@@ -115,6 +115,20 @@ describe("MCP over streamable HTTP", () => {
     await client.close();
   });
 
+  it("sends a browser GET on /mcp to the landing page and keeps the JSON 405 for other GETs", async () => {
+    const { fetchApp } = makeApp();
+    const browser = await fetchApp(`${BASE}/mcp`, { method: "GET", headers: { accept: "text/html,application/xhtml+xml" }, redirect: "manual" });
+    expect(browser.status).toBe(302);
+    expect(browser.headers.get("location")).toBe(`${BASE}/`);
+    const mounted = makeApp({ env: { LANDING_PATH: "/connectors" } });
+    const viaMount = await mounted.fetchApp(`${BASE}/mcp`, { method: "GET", headers: { accept: "text/html" }, redirect: "manual" });
+    expect(viaMount.headers.get("location")).toBe(`${BASE}/connectors`);
+    const stream = await fetchApp(`${BASE}/mcp`, { method: "GET", headers: { accept: "text/event-stream" } });
+    expect(stream.status).toBe(405);
+    const bare = await fetchApp(`${BASE}/mcp`, { method: "GET" });
+    expect(bare.status).toBe(405);
+  });
+
   it("points upgrade and docs links at the landing path when mounted under another site", async () => {
     const { fetchApp } = makeApp({ fetchImpl: upstreamFake, env: { LANDING_PATH: "/connectors" } });
     const client = await connect(fetchApp, {}, "/mcp/try");
