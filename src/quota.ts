@@ -36,15 +36,21 @@ export async function consume(store: Store, principal: Principal, now = new Date
   const path = `usage/${principal.subject.replace(":", "-")}/${utcDay(now)}.json`;
   let denied = false;
   let used = 0;
-  const written = await update<{ n: number }>(store, path, (cur) => {
-    const n = cur?.n ?? 0;
-    if (n >= plan.dailyCalls) {
-      denied = true;
-      used = n;
-      return undefined;
-    }
-    return { n: n + 1 };
-  });
+  // Agents fire several tool calls in parallel on one key, so this counter is the hot path: allow many CAS retries.
+  const written = await update<{ n: number }>(
+    store,
+    path,
+    (cur) => {
+      const n = cur?.n ?? 0;
+      if (n >= plan.dailyCalls) {
+        denied = true;
+        used = n;
+        return undefined;
+      }
+      return { n: n + 1 };
+    },
+    16,
+  );
   if (written) used = written.n;
   return {
     allowed: !denied,
