@@ -18,18 +18,25 @@ export function makeEnv(extra: Record<string, string> = {}) {
 
 export type FakeStripe = {
   checkout: { sessions: { create: (p: Record<string, unknown>) => Promise<unknown>; retrieve: (id: string) => Promise<unknown> } };
+  subscriptions: { retrieve: (id: string) => Promise<unknown> };
   billingPortal: { sessions: { create: () => Promise<{ url: string }> } };
   webhooks: { constructEventAsync: (raw: string, sig: string, secret: string) => Promise<unknown> };
   created: Record<string, unknown>[];
   sessions: Map<string, unknown>;
+  subscriptionStates: Map<string, string>;
+  subscriptionPrices: Map<string, string>;
 };
 
 export function fakeStripe(): FakeStripe {
   const created: Record<string, unknown>[] = [];
   const sessions = new Map<string, unknown>();
+  const subscriptionStates = new Map<string, string>();
+  const subscriptionPrices = new Map<string, string>();
   return {
     created,
     sessions,
+    subscriptionStates,
+    subscriptionPrices,
     checkout: {
       sessions: {
         create: async (p) => {
@@ -44,6 +51,13 @@ export function fakeStripe(): FakeStripe {
       },
     },
     billingPortal: { sessions: { create: async () => ({ url: "https://billing.stripe.test/p/session" }) } },
+    subscriptions: { retrieve: async (id) => ({
+      id,
+      status: subscriptionStates.get(id) ?? "active",
+      customer: "cus_123",
+      metadata: { app: "meshvault-connectors" },
+      items: { data: [{ price: { id: subscriptionPrices.get(id) ?? "price_test_123" }, quantity: 1 }] },
+    }) },
     webhooks: {
       constructEventAsync: async (raw, sig, secret) => {
         if (sig !== `valid:${secret}`) throw new Error("No signatures found matching the expected signature for payload");

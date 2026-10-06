@@ -58,6 +58,13 @@ export async function createPortalSession(deps: Deps, keyId: string, base: strin
 
 const id = (v: string | { id: string } | null | undefined): string | undefined => (typeof v === "string" ? v : v?.id);
 
+function hasProPrice(deps: Deps, sub: Stripe.Subscription): boolean {
+  const items = sub.items?.data;
+  return items?.length === 1 &&
+    items[0]?.price?.id === required(deps.env, "STRIPE_PRICE_PRO") &&
+    items[0]?.quantity === 1;
+}
+
 /** Turns a paid subscription Checkout Session into entitlement. Safe to call repeatedly. */
 export async function fulfillCheckoutSession(deps: Deps, session: Stripe.Checkout.Session): Promise<{ keyId: string; issued: boolean }> {
   if (session.mode !== "subscription") throw new Error("not_subscription");
@@ -65,6 +72,13 @@ export async function fulfillCheckoutSession(deps: Deps, session: Stripe.Checkou
   const customerId = id(session.customer);
   const subscriptionId = id(session.subscription);
   if (!customerId || !subscriptionId) throw new Error("missing_customer_or_subscription");
+  // Checkout Session snapshots remain "paid" after cancellation. Never let a return URL
+  // or a delayed/replayed checkout event restore an entitlement from that snapshot.
+  const subscription = await deps.stripe().subscriptions.retrieve(subscriptionId);
+  if (!["active", "trialing"].includes(subscription.status) || id(subscription.customer) !== customerId ||
+      subscription.metadata?.["app"] !== APP_TAG || !hasProPrice(deps, subscription)) {
+    throw new Error("subscription_inactive");
+  }
   const email = session.customer_details?.email ?? session.customer_email ?? undefined;
   const upgradeKeyId = session.metadata?.["key_id"] || undefined;
 
@@ -114,15 +128,20 @@ export async function revealPurchasedKey(
   const session = await deps.stripe().checkout.sessions.retrieve(sessionId);
   if (session.metadata?.["app"] !== APP_TAG) return { status: "pending" };
   if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") return { status: "pending" };
-  const out = await fulfillCheckoutSession(deps, session);
-  if (!out.issued) {
-    const got = await deps.store.get<{ keyId: string; reveal?: string; revealUntil?: number }>(`fulfilled/${sessionId}.json`);
-    if (!got) return { status: "upgraded", keyId: out.keyId };
-    if (!got.value.reveal || (got.value.revealUntil ?? 0) < Date.now()) return { status: "expired" };
-    return { status: "ready", key: openKey(got.value.reveal, required(deps.env, "APP_SECRET")) };
+  try {
+    const out = await fulfillCheckoutSession(deps, session);
+    if (!out.issued) {
+      const got = await deps.store.get<{ keyId: string; reveal?: string; revealUntil?: number }>(`fulfilled/${sessionId}.json`);
+      if (!got) return { status: "upgraded", keyId: out.keyId };
+      if (!got.value.reveal || (got.value.revealUntil ?? 0) < Date.now()) return { status: "expired" };
+      return { status: "ready", key: openKey(got.value.reveal, required(deps.env, "APP_SECRET")) };
+    }
+    const got = await deps.store.get<{ reveal: string }>(`fulfilled/${sessionId}.json`);
+    return got ? { status: "ready", key: openKey(got.value.reveal, required(deps.env, "APP_SECRET")) } : { status: "pending" };
+  } catch (err) {
+    if (err instanceof Error && err.message === "subscription_inactive") return { status: "pending" };
+    throw err;
   }
-  const got = await deps.store.get<{ reveal: string }>(`fulfilled/${sessionId}.json`);
-  return got ? { status: "ready", key: openKey(got.value.reveal, required(deps.env, "APP_SECRET")) } : { status: "pending" };
 }
 
 async function keyIdForSubscription(deps: Deps, sub: Stripe.Subscription): Promise<string | null> {
@@ -134,16 +153,23 @@ async function keyIdForSubscription(deps: Deps, sub: Stripe.Subscription): Promi
 
 const ENDED = new Set<Stripe.Subscription.Status>(["canceled", "unpaid", "incomplete_expired"]);
 
-async function applySubscription(deps: Deps, sub: Stripe.Subscription): Promise<void> {
+async function applySubscription(deps: Deps, snapshot: Stripe.Subscription): Promise<void> {
+  // Event delivery is unordered. Stripe's current state, not the event snapshot,
+  // decides whether access is still paid.
+  const sub = await deps.stripe().subscriptions.retrieve(snapshot.id);
+  if (sub.metadata["app"] !== APP_TAG) return;
   const keyId = await keyIdForSubscription(deps, sub);
   // Subscription events can beat the checkout event; let Stripe retry until the key mapping exists.
   if (!keyId) throw new Error("subscription_key_not_found_yet");
-  if (ENDED.has(sub.status)) {
+  const rec = await getKeyById(deps.store, keyId, true);
+  if (!rec) throw new Error("subscription_key_not_found_yet");
+  if (rec.stripeSubscriptionId !== sub.id || rec.stripeCustomerId !== id(sub.customer)) return;
+  if (ENDED.has(sub.status) || !hasProPrice(deps, sub)) {
     await updateKey(deps.store, keyId, (cur) =>
       cur.origin === "paid" ? { status: "revoked", revokedReason: `subscription_${sub.status}`, plan: "free" } : { plan: "free" },
     );
   } else if (sub.status === "active" || sub.status === "trialing") {
-    await updateKey(deps.store, keyId, () => ({ plan: "pro", stripeSubscriptionId: sub.id }));
+    await updateKey(deps.store, keyId, (cur) => cur.status === "active" ? { plan: "pro" } : {});
   }
 }
 
@@ -162,7 +188,12 @@ export async function handleWebhook(deps: Deps, rawBody: string, signature: stri
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.metadata?.["app"] !== APP_TAG) return { handled: false, type: event.type };
       if (session.mode === "subscription" && (session.payment_status === "paid" || session.payment_status === "no_payment_required")) {
-        await fulfillCheckoutSession(deps, session);
+        try {
+          await fulfillCheckoutSession(deps, session);
+        } catch (err) {
+          // An old paid Checkout Session is not a new purchase.
+          if (!(err instanceof Error) || err.message !== "subscription_inactive") throw err;
+        }
       }
       break;
     }
