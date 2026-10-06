@@ -1,6 +1,26 @@
 # MeshVault Connectors
 
-Remote [MCP](https://modelcontextprotocol.io) server that gives ChatGPT, Claude and Gemini read-only tools in four groups. One deployable service (Vercel Function + static site), Streamable HTTP, OAuth 2.1 or API key, free tier, Pro plan through Stripe.
+[![CI](https://github.com/thefiredev-cloud/meshvault-connectors/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/thefiredev-cloud/meshvault-connectors/actions/workflows/ci.yml)
+[![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![MCP transport](https://img.shields.io/badge/MCP-Streamable_HTTP-blue)](https://modelcontextprotocol.io)
+
+MeshVault Connectors gives your AI assistant read-only MCP tools for EMS protocols, judges and courts, public health data and model sizing.
+
+## Add it to Claude Code
+
+```bash
+claude mcp add --transport http meshvault https://thefiredev.com/mcp/try
+```
+
+This adds the keyless trial endpoint: 10 tool calls per UTC day per network. [Other clients and authentication](#use-it).
+
+**Free:** a key allows 100 calls a day across all 18 tools. **Pro:** $19/month for 5,000 calls a day, with the same tools. [Get a free key or choose Pro](https://thefiredev.com/connectors#pricing). The server source is MIT; self-hosting is separate from the hosted plans.
+
+![Terminal demo: add MeshVault to Claude Code, confirm the connection and list its 18 tools](docs/assets/demo.gif)
+
+Recorded from a real run in a fresh Omabox home. The demo shows connection and tool discovery, not a tool call; idle time is shortened.
+
+## Tool groups
 
 | Group | Tools | Source |
 | --- | --- | --- |
