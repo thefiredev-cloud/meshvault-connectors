@@ -8,7 +8,8 @@ import { handleMcpRequest } from "./mcp.js";
 import { clientIp, originOf, registerOAuthRoutes, verifyAccessToken } from "./oauth.js";
 import { escapeHtml, pageShell } from "./pages.js";
 import { anonymousSubject, hit, nextUtcMidnight, utcDay, type Principal } from "./quota.js";
-import { toolsByGroup } from "./tools/index.js";
+import { z } from "zod";
+import { ALL_TOOLS, toolsByGroup } from "./tools/index.js";
 
 type Auth = { ok: true; principal: Principal } | { ok: false; response: Response };
 
@@ -77,6 +78,7 @@ export function createApp(deps: Deps): Hono {
       authentication: { required: true, schemes: ["oauth2", "bearer"] },
       tryEndpoint: `${base}/mcp/try`,
       toolGroups: toolsByGroup(),
+      tools: ALL_TOOLS.map((t) => ({ name: t.name, title: t.title, description: t.description, inputSchema: z.toJSONSchema(z.object(t.input)) })),
     });
   });
 

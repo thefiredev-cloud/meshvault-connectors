@@ -165,13 +165,17 @@ export const healthTools = [
         ctx,
         fdaUrl(ctx, "/drug/label.json", {
           search: `(openfda.generic_name:${term} openfda.brand_name:${term}) AND openfda.product_type:"HUMAN PRESCRIPTION DRUG"`,
-          limit: limit * 3,
+          limit: Math.min(20, limit * 8),
         }),
         3600,
       );
+      const wanted = name.trim().toLowerCase();
+      const isExact = (r: LabelResult) => [...(r.openfda?.generic_name ?? []), ...(r.openfda?.brand_name ?? [])].some((n) => n.toLowerCase() === wanted);
+      // Prefer single-ingredient labels that match the name exactly over combination products.
+      const ranked = [...(d.results ?? [])].sort((a, b) => Number(isExact(b)) - Number(isExact(a)));
       const seen = new Set<string>();
       const labels = [];
-      for (const r of d.results ?? []) {
+      for (const r of ranked) {
         const brand = first(r.openfda?.brand_name) ?? first(r.openfda?.generic_name) ?? "unknown";
         const key = `${brand}|${first(r.openfda?.manufacturer_name) ?? ""}`;
         if (seen.has(key)) continue;

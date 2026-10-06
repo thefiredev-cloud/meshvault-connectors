@@ -130,7 +130,7 @@ function toHardware(items: z.infer<typeof hardwareItem>[]): Hardware[] {
       label: spec?.name ?? h.gpu ?? `${vram} GB device`,
       vramGb: vram,
       bandwidthGbs: h.bandwidth_gbs ?? spec?.bandwidthGbs ?? 500,
-      count: h.count,
+      count: h.count ?? 1,
       unified: h.unified_memory ?? spec?.unified ?? false,
     };
   });

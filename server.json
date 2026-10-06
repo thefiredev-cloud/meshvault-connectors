@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.thefiredev-cloud/meshvault-connectors",
+  "title": "MeshVault Connectors",
+  "description": "Read-only tools for EMS protocols, judges and courts, public health data (NPI, FDA) and open-model GPU sizing.",
+  "version": "0.1.0",
+  "websiteUrl": "https://github.com/thefiredev-cloud/meshvault-connectors",
+  "repository": {
+    "url": "https://github.com/thefiredev-cloud/meshvault-connectors",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://__PRODUCTION_HOST__/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer <API key>. OAuth clients are prompted at connect time; get a free key on the website.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

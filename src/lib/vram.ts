@@ -159,7 +159,7 @@ export function totalUsableGb(hw: Hardware[]): number {
 export type Verdict = "fits" | "tight" | "no";
 
 export function verdictFor(neededGb: number, usableGb: number): Verdict {
-  if (neededGb > usableGb) return "no";
+  if (!Number.isFinite(neededGb) || !Number.isFinite(usableGb) || neededGb > usableGb) return "no";
   return neededGb > usableGb * 0.92 ? "tight" : "fits";
 }
 
