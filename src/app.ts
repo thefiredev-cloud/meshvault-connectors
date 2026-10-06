@@ -1,6 +1,6 @@
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
-import { PLANS, SERVER_INFO, docsUrl } from "./config.js";
+import { PLANS, SERVER_INFO, docsUrl, landingUrl } from "./config.js";
 import type { Deps } from "./deps.js";
 import { createCheckoutSession, createPortalSession, handleWebhook, revealPurchasedKey } from "./billing.js";
 import { getKeyById, issueKey, verifyRawKey, looksLikeKey } from "./keys.js";
@@ -83,6 +83,13 @@ export function createApp(deps: Deps): Hono {
   });
 
   const handleMcp = async (c: Context, principalOverride?: Principal) => {
+    if (c.req.method === "GET" && !principalOverride) {
+      // A person pasting the endpoint into a browser gets the product page. Clients that ask for an event stream keep the JSON 405.
+      const accept = c.req.header("accept") ?? "";
+      if (accept.includes("text/html") && !accept.includes("text/event-stream")) {
+        return c.redirect(landingUrl(deps.env, originOf(c, deps)), 302);
+      }
+    }
     if (c.req.method !== "POST") {
       return c.json({ jsonrpc: "2.0", error: { code: -32000, message: "Use POST. This server is stateless and has no SSE stream." }, id: null }, 405, { allow: "POST, OPTIONS" });
     }

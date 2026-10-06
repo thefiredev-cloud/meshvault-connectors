@@ -47,6 +47,7 @@ function landingBase(env: Env, base: string): string {
   return `${base}${(env.get("LANDING_PATH") ?? "").replace(/\/+$/, "")}`;
 }
 export const pricingUrl = (env: Env, base: string): string => `${landingBase(env, base)}${env.get("LANDING_PATH") ? "" : "/"}#pricing`;
+export const landingUrl = (env: Env, base: string): string => `${landingBase(env, base)}${env.get("LANDING_PATH") ? "" : "/"}`;
 export const docsUrl = (env: Env, base: string): string => `${landingBase(env, base)}/docs`;
 
 export const SERVER_INFO = {
