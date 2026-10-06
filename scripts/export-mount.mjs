@@ -2,14 +2,14 @@
 /**
  * Exports the service for mounting inside another Vercel project (static site plus one function).
  *
- *   node scripts/export-mount.mjs --out ../fire-dev-site [--prefix /connectors]
+ *   node scripts/export-mount.mjs --out ../fire-dev-site [--prefix /connectors] [--rewrites /tmp/rewrites.json]
  *
  * Writes into the host repo:
  *   api/connectors.js               one bundled CommonJS Vercel Function (no host dependencies needed)
  *   public/connectors/**            landing, docs, privacy, terms, llms.txt, style, with links under --prefix
- *   connectors.rewrites.json        the vercel.json "rewrites" entries the host must contain
+ * With --rewrites it also writes the vercel.json "rewrites" entries the host must contain, to that file.
  *
- * The host sets CONNECTORS_* environment variables (see src/mounted.ts) and LANDING_PATH=<prefix>.
+ * The host sets CONNECTORS_* environment variables (see src/mounted.ts) and CONNECTORS_LANDING_PATH=<prefix>.
  */
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -70,11 +70,12 @@ function rewrite(text, isHtml) {
   }
 })(dest);
 
-// 3. The rewrites the host's vercel.json needs: the service owns these public paths.
+// 3. The rewrites the host's vercel.json needs (--rewrites <file> writes them; the host merges them by hand).
 const fn = "/api/connectors";
 const r = (source, rest) => ({ source, destination: `${fn}?__path=${rest ?? source}` });
-writeFileSync(
-  join(out, "connectors.rewrites.json"),
+const rewritesFile = opt("rewrites");
+if (rewritesFile) writeFileSync(
+  resolve(rewritesFile),
   JSON.stringify(
     [
       r("/mcp"),
