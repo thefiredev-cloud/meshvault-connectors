@@ -1,7 +1,7 @@
 {
   "name": "meshvault-connectors",
   "version": "0.1.0",
-  "description": "Paid remote MCP connectors for ChatGPT, Claude and Gemini: EMS protocols, legal (judges and courts), public health data, open-source model sizing.",
+  "description": "Retired hosted MCP gateway (archived source). Protocol Guide and JudgeFinder now host their own MCP servers.",
   "license": "MIT",
   "type": "module",
   "engines": {
